@@ -55,25 +55,35 @@ class App extends React.Component {
 
     fetch(url)
       .then((response) => {
-        response.json().then((data) => {
-          this.setState({ sentimentOutput: data.label });
-          let output = data.label;
-          let color = "white";
-          switch (output) {
-            case "positive":
-              color = "green";
-              break;
-            case "negative":
-              color = "red";
-              break;
-            default:
-              color = "yellow";
-          }
-          output = <div style={{ color: color, fontSize: 20 }}>{output}</div>;
-          this.setState({ sentimentOutput: output });
-        });
+        // If - response is not OK
+        if (!response.ok) {
+          return response.text().then((text) => {
+            throw new Error(text);
+          });
+        }
+        // Else - response is OK
+        return response.json();
       })
-      .catch((error) => alert(error));
+      .then((data) => {
+        this.setState({ sentimentOutput: data.label });
+        let output = data.label;
+        let color = "white";
+        switch (output) {
+          case "positive":
+            color = "green";
+            break;
+          case "negative":
+            color = "red";
+            break;
+          default:
+            color = "yellow";
+        }
+        output = <div style={{ color: color, fontSize: 20 }}>{output}</div>;
+        this.setState({ sentimentOutput: output });
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
   };
 
   sendForEmotionAnalysis = () => {
@@ -92,11 +102,19 @@ class App extends React.Component {
 
     fetch(url)
       .then((response) => {
-        response.json().then((data) => {
-          this.setState({ sentimentOutput: <EmotionTable emotions={data} /> });
-        });
+        // If - response is not OK
+        if (!response.ok) {
+          return response.text().then((text) => {
+            throw new Error(text);
+          });
+        }
+        // Else - response is OK
+        return response.json();
       })
-      .catch((error) => alert(error));
+      .then((data) => {
+        this.setState({ sentimentOutput: <EmotionTable emotions={data} /> });
+      })
+      .catch((error) => alert(error.message));
   };
 
   render() {
